@@ -14,7 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chauffeurs: {
+        Row: {
+          couleur_vehicule: string
+          created_at: string
+          id: string
+          immatriculation: string
+          nom: string
+          prenom: string
+          telephone: string
+        }
+        Insert: {
+          couleur_vehicule: string
+          created_at?: string
+          id?: string
+          immatriculation: string
+          nom: string
+          prenom: string
+          telephone: string
+        }
+        Update: {
+          couleur_vehicule?: string
+          created_at?: string
+          id?: string
+          immatriculation?: string
+          nom?: string
+          prenom?: string
+          telephone?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
