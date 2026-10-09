@@ -25,7 +25,7 @@ type Errors = Partial<Record<"prenom" | "nom" | "immatriculation" | "couleur_veh
 const inputCls =
   "w-full rounded-lg border border-input bg-card pl-11 pr-4 py-3 text-base text-foreground placeholder:text-muted-foreground/70 outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/15 aria-[invalid=true]:border-destructive";
 
-function Field({ label, icon, error, children, htmlFor }: { label: string; icon: ReactNode; error?: string; children: ReactNode; htmlFor: string }) {
+function Field({ label, icon, error, children, htmlFor }: { label: string; icon: ReactNode; error?: string | undefined; children: ReactNode; htmlFor: string }) {
   return (
     <div className="space-y-1.5">
       <label htmlFor={htmlFor} className="text-sm font-semibold text-foreground">
