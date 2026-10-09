@@ -115,7 +115,7 @@ function Index() {
               </div>
 
               <Field label="Numéro d'immatriculation" htmlFor="immatriculation" icon={<Hash size={18} />} error={errors.immatriculation}>
-                <input id="immatriculation" name="immatriculation" autoCapitalize="characters" className={`${inputCls} uppercase`} aria-invalid={!!errors.immatriculation} placeholder="Ex : DK-1234-A ou AA-123-BC" />
+                <input id="immatriculation" name="immatriculation" autoCapitalize="characters" className={`${inputCls} uppercase placeholder:normal-case`} aria-invalid={!!errors.immatriculation} placeholder="Ex : DK-1234-A ou AA-123-BC" />
               </Field>
 
               <Field label="Couleur du véhicule" htmlFor="couleur_vehicule" icon={<Palette size={18} />} error={errors.couleur_vehicule}>
@@ -130,8 +130,8 @@ function Index() {
                   Numéro de téléphone <span className="text-destructive">*</span>
                 </label>
                 <div className="flex gap-2">
-                  <select name="indicatif" defaultValue="+221" aria-label="Indicatif" className="w-28 shrink-0 rounded-lg border border-input bg-card px-3 py-3 text-base outline-none focus:border-ring focus:ring-4 focus:ring-ring/15">
-                    {INDICATIFS.map((i) => <option key={i.code} value={i.code}>{i.code} {i.pays}</option>)}
+                  <select name="indicatif" defaultValue="+221" aria-label="Indicatif" className="w-24 shrink-0 rounded-lg border border-input bg-card px-3 py-3 text-base outline-none focus:border-ring focus:ring-4 focus:ring-ring/15">
+                    {INDICATIFS.map((i) => <option key={i.code} value={i.code} title={i.pays}>{i.code}</option>)}
                   </select>
                   <div className="relative flex-1">
                     <Phone size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-primary" />
