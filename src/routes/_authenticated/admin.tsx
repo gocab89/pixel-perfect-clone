@@ -56,8 +56,8 @@ function AdminPage() {
 
   function exportCsv() {
     const csv = toCsv(
-      ["Prénom", "Nom", "Immatriculation", "Couleur", "Téléphone", "Date d'inscription"],
-      rows.map((r) => [r.prenom, r.nom, r.immatriculation, r.couleur_vehicule, r.telephone, fmt(r.created_at)]),
+      ["Prénom", "Nom", "Immatriculation", "Type de véhicule", "Couleur", "Téléphone", "Date d'inscription"],
+      rows.map((r) => [r.prenom, r.nom, r.immatriculation, r.type_vehicule, r.couleur_vehicule, r.telephone, fmt(r.created_at)]),
     );
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a");
