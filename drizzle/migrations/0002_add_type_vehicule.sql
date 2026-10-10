@@ -1,0 +1,2 @@
+ALTER TABLE public.chauffeurs ADD COLUMN type_vehicule text NOT NULL DEFAULT 'KAIVI' CONSTRAINT type_vehicule_check CHECK (type_vehicule IN ('KAIVI', 'MG5'));
+COMMENT ON COLUMN public.chauffeurs.type_vehicule IS 'Type de vehicule: KAIVI ou MG5';
