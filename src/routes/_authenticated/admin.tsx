@@ -121,6 +121,10 @@ function AdminPage() {
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher : prénom, nom, téléphone, immatriculation" className={`${field} w-full pl-9`} />
           </div>
+          <select value={type} onChange={(e) => setType(e.target.value)} className={field} aria-label="Type de véhicule">
+            <option value="">Tous les types</option>
+            {TYPE_VEHICULES.map((t) => <option key={t}>{t}</option>)}
+          </select>
           <select value={couleur} onChange={(e) => setCouleur(e.target.value)} className={field} aria-label="Couleur">
             <option value="">Toutes les couleurs</option>
             {COULEURS.map((c) => <option key={c}>{c}</option>)}
