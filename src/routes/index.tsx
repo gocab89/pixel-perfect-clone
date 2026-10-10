@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState, type ReactNode } from "react";
 import { User, CarFront, Palette, Phone, Loader2, CheckCircle2, AlertCircle, ShieldCheck, Hash, Lock } from "lucide-react";
-import { COULEURS, INDICATIFS, chauffeurSchema } from "@/lib/chauffeur-schema";
+import { COULEURS, TYPE_VEHICULES, INDICATIFS, chauffeurSchema } from "@/lib/chauffeur-schema";
 import { registerChauffeur } from "@/lib/chauffeurs.functions";
 
 const TITLE = "Recensement des chauffeurs Gocab – Jeux Olympiques";
