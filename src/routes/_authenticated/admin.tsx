@@ -39,6 +39,7 @@ function AdminPage() {
     const s = q.trim().toLowerCase().replace(/\s+/g, "");
     return data.rows.filter((r) => {
       if (couleur && r.couleur_vehicule !== couleur) return false;
+      if (type && r.type_vehicule !== type) return false;
       const day = r.created_at.slice(0, 10);
       if (from && day < from) return false;
       if (to && day > to) return false;
@@ -46,7 +47,7 @@ function AdminPage() {
       return [r.prenom, r.nom, r.telephone, r.immatriculation, `${r.prenom}${r.nom}`]
         .some((v) => v.toLowerCase().replace(/[\s-]/g, "").includes(s.replace(/-/g, "")));
     });
-  }, [data.rows, q, couleur, from, to]);
+  }, [data.rows, q, couleur, type, from, to]);
 
   async function logout() {
     await supabase.auth.signOut();
