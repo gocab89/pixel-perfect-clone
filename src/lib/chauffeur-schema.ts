@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const TYPE_VEHICULES = ["KAIVI", "MG5"] as const;
+
 export const COULEURS = [
   "Blanc", "Noir", "Gris", "Argent", "Rouge", "Bleu",
   "Vert", "Jaune", "Beige", "Marron", "Autre",
