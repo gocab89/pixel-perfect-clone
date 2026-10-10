@@ -31,6 +31,7 @@ function AdminPage() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [couleur, setCouleur] = useState("");
+  const [type, setType] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
