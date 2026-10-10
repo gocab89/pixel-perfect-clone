@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState, type ReactNode } from "react";
-import { User, CarFront, Palette, Phone, Loader2, CheckCircle2, AlertCircle, ShieldCheck, Hash } from "lucide-react";
+import { User, CarFront, Palette, Phone, Loader2, CheckCircle2, AlertCircle, ShieldCheck, Hash, Lock } from "lucide-react";
 import { COULEURS, INDICATIFS, chauffeurSchema } from "@/lib/chauffeur-schema";
 import { registerChauffeur } from "@/lib/chauffeurs.functions";
 
@@ -78,7 +78,10 @@ function Index() {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-hero text-primary-foreground">
+      <header className="relative bg-hero text-primary-foreground">
+        <Link to="/auth" aria-label="Espace administrateur" title="Espace administrateur" className="absolute right-4 top-4 rounded-full border border-primary-foreground/25 p-2 text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground">
+          <Lock size={18} />
+        </Link>
         <div className="mx-auto max-w-2xl px-5 pb-28 pt-10 sm:pt-14">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/25 px-3 py-1 text-xs font-semibold uppercase tracking-wider">
             <span className="h-2 w-2 rounded-full bg-gold" /> Campagne officielle
