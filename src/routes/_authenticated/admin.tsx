@@ -148,6 +148,7 @@ function AdminPage() {
                       <td className="px-4 py-3 font-medium">{r.prenom}</td>
                       <td className="px-4 py-3 font-medium">{r.nom}</td>
                       <td className="whitespace-nowrap px-4 py-3 font-mono">{r.immatriculation}</td>
+                      <td className="px-4 py-3 font-semibold">{r.type_vehicule}</td>
                       <td className="px-4 py-3">{r.couleur_vehicule}</td>
                       <td className="whitespace-nowrap px-4 py-3"><a href={`tel:${r.telephone}`} className="text-primary hover:underline">{r.telephone}</a></td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{fmt(r.created_at)}</td>
