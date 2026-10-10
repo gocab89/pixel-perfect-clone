@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Errors = Partial<Record<"prenom" | "nom" | "immatriculation" | "couleur_vehicule" | "numero", string>>;
+type Errors = Partial<Record<"prenom" | "nom" | "immatriculation" | "type_vehicule" | "couleur_vehicule" | "numero", string>>;
 
 const inputCls =
   "w-full rounded-lg border border-input bg-card pl-11 pr-4 py-3 text-base text-foreground placeholder:text-muted-foreground/70 outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/15 aria-[invalid=true]:border-destructive";
@@ -120,6 +120,29 @@ function Index() {
               <Field label="Numéro d'immatriculation" htmlFor="immatriculation" icon={<Hash size={18} />} error={errors.immatriculation}>
                 <input id="immatriculation" name="immatriculation" autoCapitalize="characters" className={`${inputCls} uppercase placeholder:normal-case`} aria-invalid={!!errors.immatriculation} placeholder="Ex : DK-1234-A ou AA-123-BC" />
               </Field>
+
+              <fieldset className="space-y-1.5">
+                <legend className="text-sm font-semibold text-foreground">
+                  Type de véhicule <span className="text-destructive">*</span>
+                </legend>
+                <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Type de véhicule">
+                  {TYPE_VEHICULES.map((t) => (
+                    <label key={t} className="cursor-pointer">
+                      <input
+                        type="radio"
+                        name="type_vehicule"
+                        value={t}
+                        defaultChecked={t === "KAIVI"}
+                        className="peer sr-only"
+                      />
+                      <span className="flex items-center justify-center rounded-lg border border-input bg-card py-3 text-base font-bold tracking-wide text-muted-foreground transition peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary peer-focus-visible:ring-4 peer-focus-visible:ring-ring/15">
+                        {t}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                {errors.type_vehicule && <p className="text-sm text-destructive">{errors.type_vehicule}</p>}
+              </fieldset>
 
               <Field label="Couleur du véhicule" htmlFor="couleur_vehicule" icon={<Palette size={18} />} error={errors.couleur_vehicule}>
                 <select id="couleur_vehicule" name="couleur_vehicule" defaultValue="" className={`${inputCls} appearance-none`} aria-invalid={!!errors.couleur_vehicule}>
