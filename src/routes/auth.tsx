@@ -54,9 +54,7 @@ function AuthPage() {
         <button disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-70">
           {loading && <Loader2 size={18} className="animate-spin" />}{mode === "in" ? "Se connecter" : "Créer le compte"}
         </button>
-        <button type="button" onClick={() => { setMode(mode === "in" ? "up" : "in"); setMsg(null); }} className="w-full text-sm text-muted-foreground hover:text-foreground">
-          {mode === "in" ? "Pas encore de compte ? Créer un compte" : "Déjà un compte ? Se connecter"}
-        </button>
+        <a href="/" className="block text-center text-sm text-muted-foreground hover:text-foreground">← Retour au formulaire</a>
       </form>
     </div>
   );
