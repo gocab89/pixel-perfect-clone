@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Download, LogOut, Search, Users, ShieldAlert } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { listChauffeurs } from "@/lib/admin.functions";
-import { COULEURS } from "@/lib/chauffeur-schema";
+import { COULEURS, TYPE_VEHICULES } from "@/lib/chauffeur-schema";
 import { toCsv } from "@/lib/csv";
 
 const chauffeursQuery = queryOptions({ queryKey: ["chauffeurs"], queryFn: () => listChauffeurs() });
@@ -31,6 +31,7 @@ function AdminPage() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [couleur, setCouleur] = useState("");
+  const [type, setType] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -38,6 +39,7 @@ function AdminPage() {
     const s = q.trim().toLowerCase().replace(/\s+/g, "");
     return data.rows.filter((r) => {
       if (couleur && r.couleur_vehicule !== couleur) return false;
+      if (type && r.type_vehicule !== type) return false;
       const day = r.created_at.slice(0, 10);
       if (from && day < from) return false;
       if (to && day > to) return false;
@@ -45,7 +47,7 @@ function AdminPage() {
       return [r.prenom, r.nom, r.telephone, r.immatriculation, `${r.prenom}${r.nom}`]
         .some((v) => v.toLowerCase().replace(/[\s-]/g, "").includes(s.replace(/-/g, "")));
     });
-  }, [data.rows, q, couleur, from, to]);
+  }, [data.rows, q, couleur, type, from, to]);
 
   async function logout() {
     await supabase.auth.signOut();
@@ -54,8 +56,8 @@ function AdminPage() {
 
   function exportCsv() {
     const csv = toCsv(
-      ["Prénom", "Nom", "Immatriculation", "Couleur", "Téléphone", "Date d'inscription"],
-      rows.map((r) => [r.prenom, r.nom, r.immatriculation, r.couleur_vehicule, r.telephone, fmt(r.created_at)]),
+      ["Prénom", "Nom", "Immatriculation", "Type de véhicule", "Couleur", "Téléphone", "Date d'inscription"],
+      rows.map((r) => [r.prenom, r.nom, r.immatriculation, r.type_vehicule, r.couleur_vehicule, r.telephone, fmt(r.created_at)]),
     );
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a");
@@ -114,11 +116,15 @@ function AdminPage() {
           </div>
         </div>
 
-        <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:grid-cols-[1fr_auto_auto_auto]">
+        <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:grid-cols-[1fr_auto_auto_auto_auto]">
           <div className="relative">
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher : prénom, nom, téléphone, immatriculation" className={`${field} w-full pl-9`} />
           </div>
+          <select value={type} onChange={(e) => setType(e.target.value)} className={field} aria-label="Type de véhicule">
+            <option value="">Tous les types</option>
+            {TYPE_VEHICULES.map((t) => <option key={t}>{t}</option>)}
+          </select>
           <select value={couleur} onChange={(e) => setCouleur(e.target.value)} className={field} aria-label="Couleur">
             <option value="">Toutes les couleurs</option>
             {COULEURS.map((c) => <option key={c}>{c}</option>)}
@@ -134,7 +140,7 @@ function AdminPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="bg-muted text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>{["Prénom", "Nom", "Immatriculation", "Couleur", "Téléphone", "Inscrit le"].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3 font-semibold">{h}</th>)}</tr>
+                  <tr>{["Prénom", "Nom", "Immatriculation", "Type", "Couleur", "Téléphone", "Inscrit le"].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3 font-semibold">{h}</th>)}</tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {rows.map((r) => (
@@ -142,6 +148,7 @@ function AdminPage() {
                       <td className="px-4 py-3 font-medium">{r.prenom}</td>
                       <td className="px-4 py-3 font-medium">{r.nom}</td>
                       <td className="whitespace-nowrap px-4 py-3 font-mono">{r.immatriculation}</td>
+                      <td className="px-4 py-3 font-semibold">{r.type_vehicule}</td>
                       <td className="px-4 py-3">{r.couleur_vehicule}</td>
                       <td className="whitespace-nowrap px-4 py-3"><a href={`tel:${r.telephone}`} className="text-primary hover:underline">{r.telephone}</a></td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{fmt(r.created_at)}</td>

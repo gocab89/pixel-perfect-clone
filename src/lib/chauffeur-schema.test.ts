@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildPhone, chauffeurSchema } from "./chauffeur-schema";
 
-const base = { prenom: "Moussa", nom: "Diop", immatriculation: "dk 1234 a", couleur_vehicule: "Blanc", indicatif: "+221", numero: "77 123 45 67" };
+const base = { prenom: "Moussa", nom: "Diop", immatriculation: "dk 1234 a", type_vehicule: "KAIVI", couleur_vehicule: "Blanc", indicatif: "+221", numero: "77 123 45 67" };
 
 describe("recensement", () => {
   it("defaults Senegal numbers to +221 format", () => {
@@ -19,5 +19,16 @@ describe("recensement", () => {
   });
   it("requires a known color", () => {
     expect(chauffeurSchema.safeParse({ ...base, couleur_vehicule: "Rose" }).success).toBe(false);
+  });
+  it("accepts the KAIVI vehicle type", () => {
+    const r = chauffeurSchema.parse({ ...base, type_vehicule: "KAIVI" });
+    expect(r.type_vehicule).toBe("KAIVI");
+  });
+  it("accepts the MG5 vehicle type", () => {
+    const r = chauffeurSchema.parse({ ...base, type_vehicule: "MG5" });
+    expect(r.type_vehicule).toBe("MG5");
+  });
+  it("rejects an unknown vehicle type", () => {
+    expect(chauffeurSchema.safeParse({ ...base, type_vehicule: "CLIO" }).success).toBe(false);
   });
 });

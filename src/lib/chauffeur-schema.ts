@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const TYPE_VEHICULES = ["KAIVI", "MG5"] as const;
+
 export const COULEURS = [
   "Blanc", "Noir", "Gris", "Argent", "Rouge", "Bleu",
   "Vert", "Jaune", "Beige", "Marron", "Autre",
@@ -47,6 +49,7 @@ export const chauffeurSchema = z
     nom: nameField("nom"),
     immatriculation: z.string().transform(normalizePlate)
       .refine((v) => PLATE_RE.test(v), "Immatriculation invalide (ex : DK-1234-A ou AA-123-BC)"),
+    type_vehicule: z.enum(TYPE_VEHICULES, { message: "Veuillez choisir un type de véhicule" }),
     couleur_vehicule: z.enum(COULEURS, { message: "Veuillez choisir une couleur" }),
     indicatif: z.string().regex(/^\+\d{1,4}$/, "Indicatif invalide"),
     numero: z.string().trim().min(1, "Le numéro de téléphone est obligatoire"),
@@ -58,7 +61,7 @@ export const chauffeurSchema = z
       ctx.addIssue({ code: "custom", path: ["numero"], message: "Numéro de téléphone invalide" });
       return z.NEVER;
     }
-    return { prenom: d.prenom, nom: d.nom, immatriculation: d.immatriculation, couleur_vehicule: d.couleur_vehicule, telephone };
+    return { prenom: d.prenom, nom: d.nom, immatriculation: d.immatriculation, type_vehicule: d.type_vehicule, couleur_vehicule: d.couleur_vehicule, telephone };
   });
 
 export type ChauffeurInput = z.input<typeof chauffeurSchema>;
