@@ -8,7 +8,7 @@ export const listChauffeurs = createServerFn({ method: "GET" })
     if (!isAdmin) return { isAdmin: false as const, rows: [] };
     const { data, error } = await context.supabase
       .from("chauffeurs")
-      .select("id, prenom, nom, immatriculation, couleur_vehicule, telephone, created_at")
+      .select("id, prenom, nom, immatriculation, type_vehicule, couleur_vehicule, telephone, created_at")
       .order("created_at", { ascending: false })
       .limit(20000);
     if (error) {
