@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Download, LogOut, Search, Users, ShieldAlert } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { listChauffeurs } from "@/lib/admin.functions";
-import { COULEURS } from "@/lib/chauffeur-schema";
+import { COULEURS, TYPE_VEHICULES } from "@/lib/chauffeur-schema";
 import { toCsv } from "@/lib/csv";
 
 const chauffeursQuery = queryOptions({ queryKey: ["chauffeurs"], queryFn: () => listChauffeurs() });
