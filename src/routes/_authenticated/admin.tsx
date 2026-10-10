@@ -140,7 +140,7 @@ function AdminPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="bg-muted text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>{["Prénom", "Nom", "Immatriculation", "Couleur", "Téléphone", "Inscrit le"].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3 font-semibold">{h}</th>)}</tr>
+                  <tr>{["Prénom", "Nom", "Immatriculation", "Type", "Couleur", "Téléphone", "Inscrit le"].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3 font-semibold">{h}</th>)}</tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {rows.map((r) => (
