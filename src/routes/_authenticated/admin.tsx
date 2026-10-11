@@ -175,6 +175,16 @@ function AdminPage() {
                       <td className="px-4 py-3">{r.couleur_vehicule}</td>
                       <td className="whitespace-nowrap px-4 py-3"><a href={`tel:${r.telephone}`} className="text-primary hover:underline">{r.telephone}</a></td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{fmt(r.created_at)}</td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <div className="flex gap-2">
+                          <button onClick={() => { setEditing(r); setActionError(""); }} aria-label={`Modifier ${r.prenom} ${r.nom}`} className="rounded-lg border border-input p-2 text-primary hover:bg-accent" title="Modifier">
+                            <Pencil size={15} />
+                          </button>
+                          <button onClick={() => { setDeleting(r); setActionError(""); }} aria-label={`Supprimer ${r.prenom} ${r.nom}`} className="rounded-lg border border-input p-2 text-destructive hover:bg-destructive/10" title="Supprimer">
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -183,6 +193,118 @@ function AdminPage() {
           )}
         </div>
       </main>
+
+      {editing && (
+        <EditModal
+          chauffeur={editing}
+          busy={busy}
+          error={actionError}
+          onClose={() => setEditing(null)}
+          onSave={async (payload) => {
+            if (busy) return;
+            setBusy(true);
+            setActionError("");
+            const res = await updateChauffeur({ data: { id: editing.id, ...payload } });
+            setBusy(false);
+            if (!res.ok) { setActionError(res.error); return; }
+            setEditing(null);
+            refresh();
+          }}
+        />
+      )}
+
+      {deleting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 px-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-card">
+            <h2 className="text-lg font-bold">Supprimer ce chauffeur ?</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {deleting.prenom} {deleting.nom} ({deleting.immatriculation}) sera définitivement retiré du recensement.
+            </p>
+            {actionError && <p className="mt-3 text-sm font-medium text-destructive">{actionError}</p>}
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={() => setDeleting(null)} disabled={busy} className="rounded-lg border border-input px-4 py-2 text-sm font-semibold hover:bg-accent">Annuler</button>
+              <button onClick={confirmDelete} disabled={busy} className="rounded-lg bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50">
+                {busy ? "Suppression…" : "Supprimer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function splitPhone(tel: string): { indicatif: string; numero: string } {
+  const match = INDICATIFS.find((i) => tel.startsWith(i.code));
+  return match ? { indicatif: match.code, numero: tel.slice(match.code.length) } : { indicatif: "+221", numero: tel.replace(/^\+\d+/, "") };
+}
+
+function EditModal({ chauffeur, busy, error, onClose, onSave }: {
+  chauffeur: Chauffeur;
+  busy: boolean;
+  error: string;
+  onClose: () => void;
+  onSave: (payload: Record<string, string>) => void;
+}) {
+  const phone = splitPhone(chauffeur.telephone);
+  const [prenom, setPrenom] = useState(chauffeur.prenom);
+  const [nom, setNom] = useState(chauffeur.nom);
+  const [immatriculation, setImmatriculation] = useState(chauffeur.immatriculation);
+  const [typeVehicule, setTypeVehicule] = useState(chauffeur.type_vehicule);
+  const [couleur, setCouleur] = useState(chauffeur.couleur_vehicule);
+  const [indicatif, setIndicatif] = useState(phone.indicatif);
+  const [numero, setNumero] = useState(phone.numero);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 px-4" role="dialog" aria-modal="true">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-card">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold">Modifier le chauffeur</h2>
+          <button onClick={onClose} aria-label="Fermer" className="rounded-lg p-1.5 hover:bg-accent"><X size={18} /></button>
+        </div>
+        <form
+          className="mt-4 grid gap-3 sm:grid-cols-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSave({ prenom, nom, immatriculation, type_vehicule: typeVehicule, couleur_vehicule: couleur, indicatif, numero, website: "" });
+          }}
+        >
+          <label className="grid gap-1 text-sm font-medium">Prénom
+            <input value={prenom} onChange={(e) => setPrenom(e.target.value)} className={field} required />
+          </label>
+          <label className="grid gap-1 text-sm font-medium">Nom
+            <input value={nom} onChange={(e) => setNom(e.target.value)} className={field} required />
+          </label>
+          <label className="grid gap-1 text-sm font-medium">Immatriculation
+            <input value={immatriculation} onChange={(e) => setImmatriculation(e.target.value)} className={field} required />
+          </label>
+          <label className="grid gap-1 text-sm font-medium">Type de véhicule
+            <select value={typeVehicule} onChange={(e) => setTypeVehicule(e.target.value)} className={field}>
+              {TYPE_VEHICULES.map((t) => <option key={t}>{t}</option>)}
+            </select>
+          </label>
+          <label className="grid gap-1 text-sm font-medium">Couleur
+            <select value={couleur} onChange={(e) => setCouleur(e.target.value)} className={field}>
+              {COULEURS.map((c) => <option key={c}>{c}</option>)}
+            </select>
+          </label>
+          <label className="grid gap-1 text-sm font-medium">Téléphone
+            <span className="flex gap-2">
+              <select value={indicatif} onChange={(e) => setIndicatif(e.target.value)} className={`${field} w-24`} aria-label="Indicatif">
+                {INDICATIFS.map((i) => <option key={i.code} value={i.code}>{i.code}</option>)}
+              </select>
+              <input value={numero} onChange={(e) => setNumero(e.target.value)} className={`${field} flex-1`} required aria-label="Numéro" />
+            </span>
+          </label>
+          {error && <p className="text-sm font-medium text-destructive sm:col-span-2">{error}</p>}
+          <div className="flex justify-end gap-2 sm:col-span-2">
+            <button type="button" onClick={onClose} disabled={busy} className="rounded-lg border border-input px-4 py-2 text-sm font-semibold hover:bg-accent">Annuler</button>
+            <button type="submit" disabled={busy} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+              {busy ? "Enregistrement…" : "Enregistrer"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
