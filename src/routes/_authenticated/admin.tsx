@@ -34,11 +34,29 @@ const field = "rounded-lg border border-input bg-card px-3 py-2.5 text-sm outlin
 function AdminPage() {
   const { data } = useSuspenseQuery(chauffeursQuery);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [q, setQ] = useState("");
   const [couleur, setCouleur] = useState("");
   const [type, setType] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [editing, setEditing] = useState<Chauffeur | null>(null);
+  const [deleting, setDeleting] = useState<Chauffeur | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState("");
+
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["chauffeurs"] });
+
+  async function confirmDelete() {
+    if (!deleting || busy) return;
+    setBusy(true);
+    setActionError("");
+    const res = await deleteChauffeur({ data: { id: deleting.id } });
+    setBusy(false);
+    if (!res.ok) { setActionError(res.error); return; }
+    setDeleting(null);
+    refresh();
+  }
 
   const rows = useMemo(() => {
     const s = q.trim().toLowerCase().replace(/\s+/g, "");
