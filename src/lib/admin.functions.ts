@@ -1,5 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { chauffeurSchema } from "./chauffeur-schema";
+
+type AuthCtx = { supabase: any; userId: string };
+
+async function requireAdmin(context: AuthCtx) {
+  const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+  if (!isAdmin) throw new Error("Accès refusé : droits administrateur requis.");
+}
 
 export const listChauffeurs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
