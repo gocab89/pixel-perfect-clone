@@ -77,6 +77,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      verify_chauffeur: {
+        Args: { _telephone: string }
+        Returns: {
+          couleur_vehicule: string
+          created_at: string
+          immatriculation: string
+          nom: string
+          prenom: string
+          telephone: string
+          type_vehicule: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin"

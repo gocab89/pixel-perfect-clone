@@ -29,6 +29,13 @@
       "when": 1791676835169,
       "tag": "0003_admin_update_delete_chauffeurs",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791677379342,
+      "tag": "0004_verify_chauffeur_by_phone",
+      "breakpoints": true
     }
   ]
 }
