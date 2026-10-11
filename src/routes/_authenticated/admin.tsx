@@ -1,13 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Download, LogOut, Search, Users, ShieldAlert } from "lucide-react";
+import { Download, LogOut, Pencil, Search, Trash2, Users, ShieldAlert, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { listChauffeurs } from "@/lib/admin.functions";
-import { COULEURS, TYPE_VEHICULES } from "@/lib/chauffeur-schema";
+import { deleteChauffeur, listChauffeurs, updateChauffeur } from "@/lib/admin.functions";
+import { COULEURS, INDICATIFS, TYPE_VEHICULES } from "@/lib/chauffeur-schema";
 import { toCsv } from "@/lib/csv";
 
 const chauffeursQuery = queryOptions({ queryKey: ["chauffeurs"], queryFn: () => listChauffeurs() });
+
+type Chauffeur = {
+  id: string; prenom: string; nom: string; immatriculation: string;
+  type_vehicule: string; couleur_vehicule: string; telephone: string; created_at: string;
+};
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
