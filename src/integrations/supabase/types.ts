@@ -77,6 +77,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      plate_key: { Args: { _p: string }; Returns: string }
       verify_chauffeur: {
         Args: { _telephone: string }
         Returns: {

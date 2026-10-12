@@ -36,7 +36,7 @@ export const registerChauffeur = createServerFn({ method: "POST" })
     const { error } = await db.from("chauffeurs").insert(data);
     if (error) {
       if (error.code === "23505") {
-        return { ok: false as const, error: "Ce véhicule est déjà inscrit au recensement." };
+        return { ok: false as const, error: "Cette immatriculation est déjà enregistrée. Vérifiez les informations saisies ou contactez l'administrateur." };
       }
       console.error("registerChauffeur", error);
       return { ok: false as const, error: "Une erreur est survenue. Veuillez réessayer." };

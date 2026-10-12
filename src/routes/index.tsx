@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState, type ReactNode } from "react";
 import { User, CarFront, Palette, Phone, Loader2, CheckCircle2, AlertCircle, ShieldCheck, Hash, Lock } from "lucide-react";
-import { COULEURS, TYPE_VEHICULES, INDICATIFS, chauffeurSchema } from "@/lib/chauffeur-schema";
+import { COULEURS, TYPE_VEHICULES, INDICATIFS, chauffeurSchema, normalizePlate } from "@/lib/chauffeur-schema";
 import { registerChauffeur } from "@/lib/chauffeurs.functions";
 
 const TITLE = "Recensement des chauffeurs Gocab – Jeux Olympiques";
@@ -118,7 +118,7 @@ function Index() {
               </div>
 
               <Field label="Numéro d'immatriculation" htmlFor="immatriculation" icon={<Hash size={18} />} error={errors.immatriculation}>
-                <input id="immatriculation" name="immatriculation" autoCapitalize="characters" className={`${inputCls} uppercase placeholder:normal-case`} aria-invalid={!!errors.immatriculation} placeholder="Ex : DK-1234-A ou AA-123-BC" />
+                <input id="immatriculation" name="immatriculation" autoCapitalize="characters" autoComplete="off" spellCheck={false} onChange={(e) => { e.currentTarget.value = normalizePlate(e.currentTarget.value); }} className={`${inputCls} uppercase placeholder:normal-case`} aria-invalid={!!errors.immatriculation} placeholder="Ex : AB-230-FD" />
               </Field>
 
               <fieldset className="space-y-1.5">
