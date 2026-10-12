@@ -79,9 +79,14 @@ function Index() {
   return (
     <div className="min-h-screen">
       <header className="relative bg-hero text-primary-foreground">
-        <Link to="/auth" aria-label="Espace administrateur" title="Espace administrateur" className="absolute right-4 top-4 rounded-full border border-primary-foreground/25 p-2 text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground">
-          <Lock size={18} />
-        </Link>
+        <div className="absolute right-4 top-4 flex items-center gap-2">
+          <Link to="/verification" className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/25 px-3 py-2 text-xs font-semibold text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground">
+            <ShieldCheck size={16} /> Vérification
+          </Link>
+          <Link to="/auth" aria-label="Espace administrateur" title="Espace administrateur" className="rounded-full border border-primary-foreground/25 p-2 text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground">
+            <Lock size={18} />
+          </Link>
+        </div>
         <div className="mx-auto max-w-2xl px-5 pb-28 pt-10 sm:pt-14">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/25 px-3 py-1 text-xs font-semibold uppercase tracking-wider">
             <span className="h-2 w-2 rounded-full bg-gold" /> Campagne officielle
