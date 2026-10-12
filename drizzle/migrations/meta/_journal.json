@@ -36,6 +36,13 @@
       "when": 1791677379342,
       "tag": "0004_verify_chauffeur_by_phone",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791763971700,
+      "tag": "0005_plate_normalized_uniqueness",
+      "breakpoints": true
     }
   ]
 }
