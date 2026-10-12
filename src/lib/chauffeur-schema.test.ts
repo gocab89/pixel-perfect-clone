@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildPhone, chauffeurSchema } from "./chauffeur-schema";
+import { buildPhone, chauffeurSchema, normalizePlate } from "./chauffeur-schema";
 
 const base = { prenom: "Moussa", nom: "Diop", immatriculation: "dk 1234 a", type_vehicule: "KAIVI", couleur_vehicule: "Blanc", indicatif: "+221", numero: "77 123 45 67" };
 
@@ -16,6 +16,12 @@ describe("recensement", () => {
   it("normalizes the plate", () => {
     const r = chauffeurSchema.parse(base);
     expect(r.immatriculation).toBe("DK-1234-A");
+  });
+  it("formats AB230FD as AB-230-FD", () => {
+    expect(normalizePlate("ab230fd")).toBe("AB-230-FD");
+  });
+  it("formats DK1234AA as DK-1234-AA", () => {
+    expect(normalizePlate("DK 1234--AA")).toBe("DK-1234-AA");
   });
   it("requires a known color", () => {
     expect(chauffeurSchema.safeParse({ ...base, couleur_vehicule: "Rose" }).success).toBe(false);

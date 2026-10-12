@@ -19,9 +19,15 @@ export const INDICATIFS = [
   { code: "+1", pays: "États-Unis / Canada" },
 ] as const;
 
-/** Normalise une plaque: majuscules, espaces/points -> tirets. */
+/** Formate une plaque: majuscules, sans espaces, tiret entre lettres et chiffres (AB230FD -> AB-230-FD). */
 export function normalizePlate(v: string) {
-  return v.trim().toUpperCase().replace(/[\s.]+/g, "-").replace(/-+/g, "-");
+  const clean = v.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+  return (clean.match(/[A-Z]+|\d+/g) ?? []).join("-");
+}
+
+/** Formatage en temps réel pendant la saisie (garde un tiret final si l'utilisateur vient d'en taper un). */
+export function formatPlateInput(v: string) {
+  return normalizePlate(v);
 }
 
 // Formats sénégalais: ancien "DK-1234-A", nouveau "AA-123-AB", ou variantes alphanumériques.
