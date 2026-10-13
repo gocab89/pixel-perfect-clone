@@ -26,6 +26,7 @@ export async function analyserInscription(c: Input): Promise<Analyse> {
       reasoning: { effort: "low" },
       instructions:
         "Tu vérifies des inscriptions de chauffeurs VTC Gocab (Sénégal) pour les Jeux Olympiques. " +
+        "Formats valides : immatriculations sénégalaises du type AB-123-CD ou DK-1234-AA ; types de véhicule KAIVI et MG5 (modèles de la flotte) ; téléphones E.164. Ne signale pas ces formats. " +
         "Rédige en français un résumé d'une phrase du dossier. Indique incomplet=true si une information semble manquante, " +
         "fictive ou douteuse (prénom/nom d'une lettre, répétés ou de test, immatriculation au format inhabituel, couleur 'Autre', numéro suspect). " +
         "Liste dans points chaque problème, en phrases courtes ; tableau vide si le dossier est complet.",
