@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildPhone, chauffeurSchema, normalizePlate } from "./chauffeur-schema";
+import { buildPhone, chauffeurSchema, lookupPhone, normalizePlate } from "./chauffeur-schema";
 
 const base = { prenom: "Moussa", nom: "Diop", immatriculation: "dk 1234 a", type_vehicule: "KAIVI", couleur_vehicule: "Blanc", indicatif: "+221", numero: "77 123 45 67" };
 
@@ -36,5 +36,23 @@ describe("recensement", () => {
   });
   it("rejects an unknown vehicle type", () => {
     expect(chauffeurSchema.safeParse({ ...base, type_vehicule: "CLIO" }).success).toBe(false);
+  });
+});
+
+describe("vérification par numéro de téléphone", () => {
+  it("accepts a local Senegal number", () => {
+    expect(lookupPhone("77 123 45 67")).toBe("+221771234567");
+  });
+  it("accepts an international number", () => {
+    expect(lookupPhone("+221 77 123 45 67")).toBe("+221771234567");
+  });
+  it("accepts the 00 prefix", () => {
+    expect(lookupPhone("00221 77 123 45 67")).toBe("+221771234567");
+  });
+  it("accepts the country code without +", () => {
+    expect(lookupPhone("221771234567")).toBe("+221771234567");
+  });
+  it("rejects a too-short number", () => {
+    expect(lookupPhone("77")).toBeNull();
   });
 });

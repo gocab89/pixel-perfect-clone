@@ -45,6 +45,19 @@ export function buildPhone(indicatif: string, numero: string): string | null {
   return /^\+[1-9]\d{6,14}$/.test(full) ? full : null;
 }
 
+/** Numéro saisi pour une vérification -> format E.164 tel qu'il est stocké (ex. "77 123 45 67" -> "+221771234567"). */
+export function lookupPhone(raw: string): string | null {
+  const clean = raw.replace(/[\s.\-()]/g, "");
+  let candidate: string;
+  if (clean.startsWith("00")) candidate = `+${clean.slice(2)}`;
+  else if (clean.startsWith("+")) candidate = clean;
+  else {
+    const digits = clean.replace(/^0+/, "");
+    candidate = digits.startsWith("221") ? `+${digits}` : `+221${digits}`;
+  }
+  return /^\+[1-9]\d{6,14}$/.test(candidate) ? candidate : null;
+}
+
 const nameField = (label: string) =>
   z.string().trim().min(1, `Le ${label} est obligatoire`).max(80, `Le ${label} est trop long`)
     .regex(/^[\p{L}\s'’-]+$/u, `Le ${label} contient des caractères non valides`);

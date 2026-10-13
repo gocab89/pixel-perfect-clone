@@ -101,7 +101,7 @@ function Index() {
         </div>
       </header>
 
-      <main className="mx-auto -mt-20 max-w-2xl px-4 pb-16">
+      <main className="relative z-10 mx-auto -mt-20 max-w-2xl px-4 pb-16">
         <div className="rounded-2xl border border-border bg-card p-6 shadow-card sm:p-8">
           {status === "success" ? (
             <div className="py-8 text-center" role="status">

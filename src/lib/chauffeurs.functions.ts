@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { buildPhone, chauffeurSchema } from "./chauffeur-schema";
+import { buildPhone, chauffeurSchema, lookupPhone } from "./chauffeur-schema";
 
 function publicDb() {
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
@@ -45,15 +45,11 @@ export const registerChauffeur = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-const phoneQuerySchema = z
-  .string()
-  .transform((v) => v.replace(/[\s.-]/g, ""))
-  .pipe(z.string().regex(/^\+?[0-9]{8,15}$/, "Numéro de téléphone invalide"));
-
 export const verifyChauffeur = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => phoneQuerySchema.parse(data))
+  .inputValidator((data: unknown) => z.string().trim().min(1).parse(data))
   .handler(async ({ data }) => {
-    const phone = data.startsWith("+") ? data : `+221${data.replace(/^0+/, "")}`;
+    const phone = lookupPhone(data);
+    if (!phone) return { ok: false as const, error: "Numéro de téléphone invalide." };
     const { data: rows, error } = await publicDb().rpc("verify_chauffeur", { _telephone: phone });
     if (error) {
       console.error("verifyChauffeur", error);
