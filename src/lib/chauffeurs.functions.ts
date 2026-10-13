@@ -34,13 +34,20 @@ export const registerChauffeur = createServerFn({ method: "POST" })
         },
       },
     });
-    const { error } = await db.from("chauffeurs").insert(data);
+    const id = crypto.randomUUID();
+    const { error } = await db.from("chauffeurs").insert({ ...data, id });
     if (error) {
       if (error.code === "23505") {
         return { ok: false as const, error: "Cette immatriculation est déjà enregistrée. Vérifiez les informations saisies ou contactez l'administrateur." };
       }
       console.error("registerChauffeur", error);
       return { ok: false as const, error: "Une erreur est survenue. Veuillez réessayer." };
+    }
+    try {
+      const { analyserEtEnregistrer } = await import("./ai-analyse.server");
+      await analyserEtEnregistrer(id, data);
+    } catch (e) {
+      console.error("analyse IA", e); // l'inscription reste valide ; l'admin peut relancer l'analyse
     }
     return { ok: true as const };
   });
