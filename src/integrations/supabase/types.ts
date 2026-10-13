@@ -16,6 +16,10 @@ export type Database = {
     Tables: {
       chauffeurs: {
         Row: {
+          ai_analyse_le: string | null
+          ai_incomplet: boolean | null
+          ai_points: string[] | null
+          ai_resume: string | null
           couleur_vehicule: string
           created_at: string
           id: string
@@ -26,6 +30,10 @@ export type Database = {
           type_vehicule: string
         }
         Insert: {
+          ai_analyse_le?: string | null
+          ai_incomplet?: boolean | null
+          ai_points?: string[] | null
+          ai_resume?: string | null
           couleur_vehicule: string
           created_at?: string
           id?: string
@@ -36,6 +44,10 @@ export type Database = {
           type_vehicule?: string
         }
         Update: {
+          ai_analyse_le?: string | null
+          ai_incomplet?: boolean | null
+          ai_points?: string[] | null
+          ai_resume?: string | null
           couleur_vehicule?: string
           created_at?: string
           id?: string
