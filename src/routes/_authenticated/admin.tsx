@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Download, LogOut, Eye, Sparkles, AlertTriangle, CheckCircle2, Pencil, Search, Trash2, Users, ShieldAlert, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { analyseChauffeur, deleteChauffeur, listChauffeurs, updateChauffeur } from "@/lib/admin.functions";
@@ -350,7 +350,7 @@ function FicheModal({ c, onClose, onDone }: { c: Chauffeur; onClose: () => void;
           <button onClick={onClose} aria-label="Fermer" className="rounded-lg p-1 hover:bg-accent"><X size={18} /></button>
         </div>
         <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-          {rows.map(([k, v]) => (<><dt key={k} className="text-muted-foreground">{k}</dt><dd key={k + "v"} className="font-medium">{v}</dd></>))}
+          {rows.map(([k, v]) => (<Fragment key={k}><dt className="text-muted-foreground">{k}</dt><dd className="font-medium">{v}</dd></Fragment>))}
         </dl>
         <section className="mt-5 rounded-xl border border-border bg-muted/50 p-4">
           <div className="flex items-center justify-between gap-2">
