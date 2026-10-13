@@ -16,7 +16,7 @@ export const listChauffeurs = createServerFn({ method: "GET" })
     if (!isAdmin) return { isAdmin: false as const, rows: [] };
     const { data, error } = await context.supabase
       .from("chauffeurs")
-      .select("id, prenom, nom, immatriculation, type_vehicule, couleur_vehicule, telephone, created_at")
+      .select("id, prenom, nom, immatriculation, type_vehicule, couleur_vehicule, telephone, created_at, ai_resume, ai_incomplet, ai_points, ai_analyse_le")
       .order("created_at", { ascending: false })
       .limit(20000);
     if (error) {
@@ -59,4 +59,29 @@ export const deleteChauffeur = createServerFn({ method: "POST" })
       return { ok: false as const, error: "Une erreur est survenue. Veuillez réessayer." };
     }
     return { ok: true as const };
+  });
+
+export const analyseChauffeur = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => {
+    const { id } = input as { id: string };
+    if (!id || typeof id !== "string") throw new Error("Identifiant manquant.");
+    return { id };
+  })
+  .handler(async ({ data, context }) => {
+    await requireAdmin(context);
+    const { data: c, error } = await context.supabase
+      .from("chauffeurs").select("prenom, nom, immatriculation, type_vehicule, couleur_vehicule, telephone").eq("id", data.id).single();
+    if (error || !c) return { ok: false as const, error: "Chauffeur introuvable." };
+    try {
+      const { analyserEtEnregistrer } = await import("./ai-analyse.server");
+      await analyserEtEnregistrer(data.id, c);
+      return { ok: true as const };
+    } catch (e) {
+      console.error("analyseChauffeur", e);
+      const m = String(e);
+      if (m.includes(" 402") || m.includes(" 403")) return { ok: false as const, error: "Crédits IA épuisés ou accès IA désactivé pour l'espace de travail." };
+      if (m.includes(" 429")) return { ok: false as const, error: "Trop de demandes à l'IA. Réessayez dans un instant." };
+      return { ok: false as const, error: "L'analyse IA a échoué. Réessayez plus tard." };
+    }
   });

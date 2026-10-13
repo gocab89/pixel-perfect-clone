@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Download, LogOut, Pencil, Search, Trash2, Users, ShieldAlert, X } from "lucide-react";
+import { Download, LogOut, Eye, Sparkles, AlertTriangle, CheckCircle2, Pencil, Search, Trash2, Users, ShieldAlert, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { deleteChauffeur, listChauffeurs, updateChauffeur } from "@/lib/admin.functions";
+import { analyseChauffeur, deleteChauffeur, listChauffeurs, updateChauffeur } from "@/lib/admin.functions";
 import { COULEURS, INDICATIFS, TYPE_VEHICULES } from "@/lib/chauffeur-schema";
 import { toCsv } from "@/lib/csv";
 
@@ -12,6 +12,7 @@ const chauffeursQuery = queryOptions({ queryKey: ["chauffeurs"], queryFn: () => 
 type Chauffeur = {
   id: string; prenom: string; nom: string; immatriculation: string;
   type_vehicule: string; couleur_vehicule: string; telephone: string; created_at: string;
+  ai_resume: string | null; ai_incomplet: boolean | null; ai_points: string[] | null; ai_analyse_le: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -41,6 +42,7 @@ function AdminPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [editing, setEditing] = useState<Chauffeur | null>(null);
+  const [viewing, setViewing] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<Chauffeur | null>(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState("");
@@ -163,7 +165,7 @@ function AdminPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="bg-muted text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>{["Prénom", "Nom", "Immatriculation", "Type", "Couleur", "Téléphone", "Inscrit le", "Actions"].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3 font-semibold">{h}</th>)}</tr>
+                  <tr>{["Prénom", "Nom", "Immatriculation", "Type", "Couleur", "Téléphone", "Inscrit le", "Dossier", "Actions"].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3 font-semibold">{h}</th>)}</tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {rows.map((r) => (
@@ -175,8 +177,12 @@ function AdminPage() {
                       <td className="px-4 py-3">{r.couleur_vehicule}</td>
                       <td className="whitespace-nowrap px-4 py-3"><a href={`tel:${r.telephone}`} className="text-primary hover:underline">{r.telephone}</a></td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{fmt(r.created_at)}</td>
+                      <td className="whitespace-nowrap px-4 py-3"><DossierBadge r={r} /></td>
                       <td className="whitespace-nowrap px-4 py-3">
                         <div className="flex gap-2">
+                          <button onClick={() => setViewing(r.id)} aria-label={`Fiche de ${r.prenom} ${r.nom}`} className="rounded-lg border border-input p-2 hover:bg-accent" title="Voir la fiche">
+                            <Eye size={15} />
+                          </button>
                           <button onClick={() => { setEditing(r); setActionError(""); }} aria-label={`Modifier ${r.prenom} ${r.nom}`} className="rounded-lg border border-input p-2 text-primary hover:bg-accent" title="Modifier">
                             <Pencil size={15} />
                           </button>
@@ -193,6 +199,11 @@ function AdminPage() {
           )}
         </div>
       </main>
+
+      {viewing && (() => {
+        const v = data.rows.find((x) => x.id === viewing);
+        return v ? <FicheModal c={v} onClose={() => setViewing(null)} onDone={refresh} /> : null;
+      })()}
 
       {editing && (
         <EditModal
@@ -304,6 +315,62 @@ function EditModal({ chauffeur, busy, error, onClose, onSave }: {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function DossierBadge({ r }: { r: Chauffeur }) {
+  if (r.ai_incomplet === null) return <span className="text-xs text-muted-foreground">Non analysé</span>;
+  return r.ai_incomplet
+    ? <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive"><AlertTriangle size={12} /> Incomplet</span>
+    : <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-xs font-semibold text-success"><CheckCircle2 size={12} /> Complet</span>;
+}
+
+function FicheModal({ c, onClose, onDone }: { c: Chauffeur; onClose: () => void; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  async function relancer() {
+    if (busy) return;
+    setBusy(true); setErr("");
+    const res = await analyseChauffeur({ data: { id: c.id } });
+    setBusy(false);
+    if (!res.ok) { setErr(res.error); return; }
+    onDone();
+  }
+  const rows: [string, string][] = [
+    ["Prénom", c.prenom], ["Nom", c.nom], ["Immatriculation", c.immatriculation], ["Type de véhicule", c.type_vehicule],
+    ["Couleur", c.couleur_vehicule], ["Téléphone", c.telephone], ["Inscrit le", fmt(c.created_at)],
+  ];
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 px-4" role="dialog" aria-modal="true" aria-label="Fiche du chauffeur">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-card">
+        <div className="flex items-start justify-between gap-4">
+          <h2 className="text-lg font-bold">Fiche de {c.prenom} {c.nom}</h2>
+          <button onClick={onClose} aria-label="Fermer" className="rounded-lg p-1 hover:bg-accent"><X size={18} /></button>
+        </div>
+        <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+          {rows.map(([k, v]) => (<><dt key={k} className="text-muted-foreground">{k}</dt><dd key={k + "v"} className="font-medium">{v}</dd></>))}
+        </dl>
+        <section className="mt-5 rounded-xl border border-border bg-muted/50 p-4">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="flex items-center gap-2 text-sm font-bold"><Sparkles size={15} className="text-primary" /> Analyse IA</h3>
+            <DossierBadge r={c} />
+          </div>
+          {c.ai_resume ? (
+            <>
+              <p className="mt-2 text-sm">{c.ai_resume}</p>
+              {c.ai_points && c.ai_points.length > 0 && (
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-destructive">{c.ai_points.map((p, i) => <li key={i}>{p}</li>)}</ul>
+              )}
+              {c.ai_analyse_le && <p className="mt-2 text-xs text-muted-foreground">Analysé le {fmt(c.ai_analyse_le)}</p>}
+            </>
+          ) : <p className="mt-2 text-sm text-muted-foreground">Ce dossier n'a pas encore été analysé.</p>}
+          {err && <p className="mt-2 text-sm font-medium text-destructive">{err}</p>}
+          <button onClick={relancer} disabled={busy} className="mt-3 rounded-lg border border-input px-3 py-1.5 text-sm font-semibold hover:bg-accent disabled:opacity-50">
+            {busy ? "Analyse en cours…" : c.ai_resume ? "Relancer l'analyse" : "Analyser ce dossier"}
+          </button>
+        </section>
       </div>
     </div>
   );
