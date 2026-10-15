@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 import { Download, LogOut, Eye, Sparkles, AlertTriangle, CheckCircle2, Pencil, Search, Trash2, Users, ShieldAlert, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { analyseChauffeur, deleteChauffeur, listChauffeurs, updateChauffeur } from "@/lib/admin.functions";
+import { analyseChauffeur, analyseLot, deleteChauffeur, listChauffeurs, updateChauffeur } from "@/lib/admin.functions";
 import { COULEURS, INDICATIFS, TYPE_VEHICULES } from "@/lib/chauffeur-schema";
 import { toCsv } from "@/lib/csv";
 
@@ -48,6 +48,25 @@ function AdminPage() {
   const [actionError, setActionError] = useState("");
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["chauffeurs"] });
+  const nonAnalyses = data.rows.filter((r: Chauffeur) => !r.ai_analyse_le).length;
+  const [lot, setLot] = useState<{ actif: boolean; faits: number; msg: string }>({ actif: false, faits: 0, msg: "" });
+  const stopLot = useRef(false);
+
+  async function lancerLot() {
+    stopLot.current = false;
+    setLot({ actif: true, faits: 0, msg: "" });
+    let faits = 0;
+    for (;;) {
+      if (stopLot.current) { setLot({ actif: false, faits, msg: "Analyse interrompue." }); break; }
+      let res;
+      try { res = await analyseLot(); } catch { setLot({ actif: false, faits, msg: "Impossible de contacter le serveur." }); break; }
+      faits += res.traites;
+      refresh();
+      if (!res.ok) { setLot({ actif: false, faits, msg: res.error }); break; }
+      if (res.restants === 0 || res.traites === 0) { setLot({ actif: false, faits, msg: "Tous les dossiers sont analysés." }); break; }
+      setLot({ actif: true, faits, msg: `${res.restants} dossiers restants…` });
+    }
+  }
 
   async function confirmDelete() {
     if (!deleting || busy) return;
@@ -139,6 +158,29 @@ function AdminPage() {
               <Download size={16} /> Exporter CSV
             </button>
           </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center gap-3">
+            <Sparkles className="text-primary" size={20} />
+            <div>
+              <p className="text-sm font-semibold">Analyse IA des dossiers</p>
+              <p className="text-xs text-muted-foreground">
+                {nonAnalyses} dossier{nonAnalyses > 1 ? "s" : ""} non analysé{nonAnalyses > 1 ? "s" : ""}
+                {lot.faits > 0 && ` · ${lot.faits} analysé${lot.faits > 1 ? "s" : ""} pendant ce lot`}
+                {lot.msg && ` · ${lot.msg}`}
+              </p>
+            </div>
+          </div>
+          {lot.actif ? (
+            <button onClick={() => { stopLot.current = true; }} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-bold hover:bg-secondary">
+              <X size={16} /> Arrêter
+            </button>
+          ) : (
+            <button onClick={lancerLot} disabled={!nonAnalyses} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+              <Sparkles size={16} /> Analyser tous les dossiers
+            </button>
+          )}
         </div>
 
         <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:grid-cols-[1fr_auto_auto_auto_auto]">
