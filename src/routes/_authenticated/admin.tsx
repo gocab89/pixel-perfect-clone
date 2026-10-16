@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Fragment, useMemo, useRef, useState } from "react";
-import { Download, LogOut, Eye, Sparkles, AlertTriangle, CheckCircle2, Pencil, Search, Trash2, Users, ShieldAlert, X } from "lucide-react";
+import { Download, LogOut, Eye, Sparkles, AlertTriangle, CheckCircle2, Pencil, Search, Trash2, Users, ShieldAlert, X, ArrowDown, ArrowUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { analyseChauffeur, analyseLot, deleteChauffeur, listChauffeurs, updateChauffeur } from "@/lib/admin.functions";
 import { COULEURS, INDICATIFS, TYPE_VEHICULES } from "@/lib/chauffeur-schema";
@@ -46,6 +46,7 @@ function AdminPage() {
   const [deleting, setDeleting] = useState<Chauffeur | null>(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [sortDesc, setSortDesc] = useState(true);
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["chauffeurs"] });
   const nonAnalyses = data.rows.filter((r: Chauffeur) => !r.ai_analyse_le).length;
@@ -81,7 +82,7 @@ function AdminPage() {
 
   const rows = useMemo(() => {
     const s = q.trim().toLowerCase().replace(/\s+/g, "");
-    return data.rows.filter((r) => {
+    const filtered = data.rows.filter((r) => {
       if (couleur && r.couleur_vehicule !== couleur) return false;
       if (type && r.type_vehicule !== type) return false;
       const day = r.created_at.slice(0, 10);
@@ -91,7 +92,10 @@ function AdminPage() {
       return [r.prenom, r.nom, r.telephone, r.immatriculation, `${r.prenom}${r.nom}`]
         .some((v) => v.toLowerCase().replace(/[\s-]/g, "").includes(s.replace(/-/g, "")));
     });
-  }, [data.rows, q, couleur, type, from, to]);
+    return [...filtered].sort((a, b) =>
+      sortDesc ? b.created_at.localeCompare(a.created_at) : a.created_at.localeCompare(b.created_at),
+    );
+  }, [data.rows, q, couleur, type, from, to, sortDesc]);
 
   async function logout() {
     await supabase.auth.signOut();
@@ -207,7 +211,24 @@ function AdminPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="bg-muted text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>{["Prénom", "Nom", "Immatriculation", "Type", "Couleur", "Téléphone", "Inscrit le", "Dossier", "Actions"].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3 font-semibold">{h}</th>)}</tr>
+                  <tr>
+                    {["Prénom", "Nom", "Immatriculation", "Type", "Couleur", "Téléphone"].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3 font-semibold">{h}</th>)}
+                    <th className="whitespace-nowrap px-4 py-3 font-semibold" aria-sort={sortDesc ? "descending" : "ascending"}>
+                      <button
+                        type="button"
+                        onClick={() => setSortDesc((v) => !v)}
+                        title={sortDesc ? "Trier : plus récents d'abord. Cliquer pour afficher les plus anciens d'abord." : "Trier : plus anciens d'abord. Cliquer pour afficher les plus récents d'abord."}
+                        className="inline-flex items-center gap-1.5 rounded-md px-1 py-0.5 uppercase tracking-wide hover:bg-accent hover:text-foreground"
+                      >
+                        Inscrit le
+                        {sortDesc ? <ArrowDown size={13} aria-hidden /> : <ArrowUp size={13} aria-hidden />}
+                        <span className="font-normal normal-case tracking-normal text-muted-foreground">
+                          {sortDesc ? "plus récents" : "plus anciens"}
+                        </span>
+                      </button>
+                    </th>
+                    {["Dossier", "Actions"].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3 font-semibold">{h}</th>)}
+                  </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {rows.map((r) => (
